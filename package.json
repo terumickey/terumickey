@@ -1,0 +1,17 @@
+{
+  "name": "riosna-intern-watcher",
+  "version": "1.0.0",
+  "description": "りそなグループ インターンシップ マイページの空席状況を定期チェックし、空席が出たらメールで通知する",
+  "private": true,
+  "main": "check.js",
+  "scripts": {
+    "check": "node check.js",
+    "discover": "node check.js --discover",
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "nodemailer": "^9.0.3",
+    "playwright": "^1.47.0"
+  }
+}

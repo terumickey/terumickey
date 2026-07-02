@@ -1,0 +1,46 @@
+name: Resona Intern Watcher
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: resona-intern-watcher
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Run vacancy check
+        run: node check.js
+        env:
+          RESONA_LOGIN_URL: ${{ secrets.RESONA_LOGIN_URL }}
+          RESONA_ID: ${{ secrets.RESONA_ID }}
+          RESONA_PASSWORD: ${{ secrets.RESONA_PASSWORD }}
+          TARGET_DATES: ${{ secrets.TARGET_DATES }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NOTIFY_TO: ${{ secrets.NOTIFY_TO }}
+
+      - name: Persist state.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || git commit -m "Update state [skip ci]"
+          git push
